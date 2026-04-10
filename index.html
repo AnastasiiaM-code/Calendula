@@ -13,35 +13,36 @@
 :root{
   --bg:#ffffff;--bg2:#f7f5f2;--bg3:#f0ede8;
   --text:#1a1a1a;--text2:#6b6b6b;--text3:#aaa;
-  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
   --accent:#8B6A4A;--accent-fg:#F5EDE0;
   --radius:10px;--radius-lg:14px;
 }
 @media(prefers-color-scheme:dark){:root{
   --bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;
   --text:#f2f2f7;--text2:#aeaeb2;--text3:#636366;
-  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.18);
 }}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overscroll-behavior:none;}
 body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
-
+ 
 .app{max-width:430px;margin:0 auto;display:flex;flex-direction:column;height:100vh;height:100dvh;}
-
-.topbar{display:flex;align-items:center;padding:0 0.85rem;border-bottom:0.5px solid var(--border);gap:2px;flex-shrink:0;background:var(--bg);}
+ 
+.topbar{display:flex;align-items:center;padding:0 0.85rem;border-bottom:0.5px solid var(--border);gap:2px;flex-shrink:0;background:var(--bg);z-index:10;}
 .app-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:400;color:var(--text);margin-right:auto;padding:0.7rem 0.25rem 0.7rem 0;}
 .tbtn{background:none;border:none;cursor:pointer;padding:0.6rem 0.55rem;border-bottom:2px solid transparent;display:flex;align-items:center;justify-content:center;color:var(--text3);margin-bottom:-0.5px;}
-.tbtn:active{opacity:0.6;}
+.tbtn:active{opacity:0.5;}
 .tbtn.on{color:var(--text);border-bottom-color:var(--text);}
 .tbtn.plus{color:var(--accent);}
-
+ 
 .scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-
-.monthnav{display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1rem 0.4rem;}
-.monlabel{font-family:'Playfair Display',serif;font-size:21px;font-weight:400;color:var(--text);}
-.arrbtn{background:none;border:none;cursor:pointer;color:var(--text2);padding:4px 8px;border-radius:var(--radius);display:flex;align-items:center;}
-.arrbtn:active{background:var(--bg2);}
-
+ 
+/* ---- calendar scroll view ---- */
+.month-block{padding:0 0 1.5rem;}
+.month-block+.month-block{border-top:0.5px solid var(--border);}
+.monthnav{display:flex;align-items:center;justify-content:space-between;padding:0.8rem 1rem 0.4rem;}
+.monlabel{font-family:'Playfair Display',serif;font-size:20px;font-weight:400;color:var(--text);}
+ 
 .wdrow{display:grid;grid-template-columns:repeat(7,1fr);padding:0 0.6rem;gap:2px;}
 .wd{font-size:10px;text-align:center;color:var(--text3);letter-spacing:0.3px;text-transform:uppercase;padding:3px 0;}
 .dgrid{display:grid;grid-template-columns:repeat(7,1fr);padding:0 0.6rem;gap:2px;}
@@ -56,7 +57,12 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 .ebar.m{border-radius:0;margin:0 -1px;}
 .ebar.e{border-radius:0 4px 4px 0;}
 .ebar.single{border-radius:4px;}
-
+ 
+.ev-strip{padding:0 0.75rem;}
+.ev-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:20px;font-size:11px;margin:2px 3px 2px 0;cursor:pointer;}
+.ev-pill:active{opacity:0.7;}
+ 
+/* list view */
 .sec-label{font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text3);padding:0.9rem 1rem 0.35rem;}
 .evlist{padding:0 1rem 1rem;}
 .ev-row{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;background:var(--bg);border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:5px;}
@@ -67,17 +73,18 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 .ev-del{background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3);padding:0 2px;line-height:1;}
 .ev-del:active{color:#c0392b;}
 .badge{font-size:9px;background:var(--bg2);color:var(--text3);padding:1px 5px;border-radius:10px;margin-left:4px;vertical-align:middle;}
-.empty{font-size:12px;color:var(--text3);padding:0.5rem 0 1rem;}
-
+.empty{font-size:12px;color:var(--text3);padding:0.5rem 0 0.5rem;}
+ 
+/* sheet */
 .overlay{background:rgba(0,0,0,0.4);position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center;}
 .sheet{background:var(--bg);border-radius:18px 18px 0 0;padding:1rem 1.25rem;padding-bottom:calc(1.5rem + env(safe-area-inset-bottom));width:100%;max-width:430px;border-top:0.5px solid var(--border2);max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 1rem;}
 .sh-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:400;color:var(--text);margin-bottom:1rem;}
 .fl{font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2);display:block;margin-bottom:5px;}
 .fg{margin-bottom:12px;}
-.finput{width:100%;border:0.5px solid var(--border2);border-radius:var(--radius);padding:9px 11px;font-size:15px;background:var(--bg2);color:var(--text);font-family:'Inter',sans-serif;-webkit-appearance:none;appearance:none;}
+.finput{width:100%;border:0.5px solid var(--border2);border-radius:var(--radius);padding:9px 11px;font-size:15px;background:var(--bg2);color:var(--text);font-family:'Inter',sans-serif;-webkit-appearance:none;}
 .finput:focus{outline:none;border-color:var(--accent);}
-
+ 
 .mini-cal{border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:6px;}
 .mc-nav{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:0.5px solid var(--border);}
 .mc-lbl{font-size:13px;font-weight:500;color:var(--text);}
@@ -92,25 +99,23 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 .mc-d.today-d{color:var(--accent);font-weight:500;}
 .mc-d.empty{cursor:default;}
 .date-display{font-size:12px;color:var(--text2);min-height:18px;margin-top:3px;}
-
+ 
 .chips{display:flex;flex-wrap:wrap;gap:5px;}
 .chip{padding:6px 12px;border-radius:20px;font-size:13px;cursor:pointer;border:1.5px solid transparent;}
 .chip:active{opacity:0.7;}
-
 .rrow{display:flex;gap:6px;flex-wrap:wrap;}
 .ropt{padding:6px 13px;border-radius:20px;font-size:13px;cursor:pointer;border:1.5px solid var(--border2);color:var(--text2);background:none;font-family:'Inter',sans-serif;}
 .ropt:active{opacity:0.7;}
 .ropt.on{background:var(--bg2);border-color:var(--text2);color:var(--text);font-weight:500;}
-
 .dow-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
 .dow-pill{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;border:1.5px solid var(--border2);color:var(--text2);background:none;font-family:'Inter',sans-serif;}
 .dow-pill:active{opacity:0.7;}
-
+ 
 .mbtns{display:flex;gap:8px;margin-top:1rem;}
 .bsave{flex:1;padding:12px;background:var(--accent);color:var(--accent-fg);border:none;border-radius:var(--radius);font-size:15px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;}
 .bsave:active{opacity:0.85;}
 .bcancel{padding:12px 16px;background:none;border:0.5px solid var(--border2);border-radius:var(--radius);font-size:15px;cursor:pointer;color:var(--text2);font-family:'Inter',sans-serif;}
-
+ 
 .cat-mgr-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);}
 .cswatch{width:22px;height:22px;border-radius:50%;flex-shrink:0;cursor:pointer;border:2px solid transparent;}
 .cswatch.open{border-color:var(--text2);}
@@ -147,48 +152,35 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
         <circle cx="5" cy="13" r="2.2"/><circle cx="13" cy="13" r="2.2"/>
       </svg>
     </button>
-    <button class="tbtn plus" onclick="showPanel('add')" title="Добавить">
+    <button class="tbtn plus" onclick="showPanel('add',{})" title="Добавить">
       <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
         <line x1="9" y1="3" x2="9" y2="15"/><line x1="3" y1="9" x2="15" y2="9"/>
       </svg>
     </button>
   </div>
-
-  <div class="scroll-area">
-    <div id="viewCal">
-      <div class="monthnav">
-        <button class="arrbtn" onclick="nav(-1)">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="10 3 5 8 10 13"/></svg>
-        </button>
-        <span class="monlabel" id="monLabel"></span>
-        <button class="arrbtn" onclick="nav(1)">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 3 11 8 6 13"/></svg>
-        </button>
-      </div>
-      <div class="wdrow" id="wdRow"></div>
-      <div class="dgrid" id="dGrid"></div>
-      <div class="sec-label">события месяца</div>
-      <div class="evlist" id="evListCal"></div>
-    </div>
+ 
+  <div class="scroll-area" id="scrollArea">
+    <div id="viewCal"></div>
     <div id="viewList" style="display:none;">
       <div class="sec-label">все события</div>
       <div class="evlist" id="evListAll"></div>
     </div>
   </div>
 </div>
-
+ 
 <div id="overlay" class="overlay" style="display:none;" onclick="overlayClick(event)">
   <div class="sheet" id="sheetInner" onclick="event.stopPropagation()"></div>
 </div>
-
+ 
 <script>
 const MO=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 const MO_G=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const WD=['пн','вт','ср','чт','пт','сб','вс'];
 const PAL=['#E57373','#F06292','#BA68C8','#7986CB','#4DB6AC','#81C784','#FFB74D','#A1887F','#90A4AE','#64B5F6','#4DD0E1','#AED581'];
-
+const MONTHS_TO_RENDER=12;
+ 
 function loadData(){
-  try{const d=localStorage.getItem('mycal_v1');if(d) return JSON.parse(d);}catch(e){}
+  try{const d=localStorage.getItem('mycal_v2');if(d) return JSON.parse(d);}catch(e){}
   return{events:[],cats:[
     {id:'study',name:'учёба',color:'#7986CB'},
     {id:'travel',name:'путешествие',color:'#4DB6AC'},
@@ -196,35 +188,36 @@ function loadData(){
     {id:'conf',name:'конференция',color:'#FFB74D'},
   ]};
 }
-function saveData(){try{localStorage.setItem('mycal_v1',JSON.stringify(S));}catch(e){}}
-
+function saveData(){try{localStorage.setItem('mycal_v2',JSON.stringify(S));}catch(e){}}
+ 
 let S=loadData();
-let offset=0,curTab='cal',openCpId=null;
+let curTab='cal',openCpId=null;
 let selCat=null,selRepeat='none',selDow=[],mcOffset=0,pickStart=null,pickEnd=null;
-
+let renderedMonths=MONTHS_TO_RENDER;
+ 
 function catById(id){return S.cats.find(c=>c.id===id)||{name:'?',color:'#aaa'};}
 function dim(y,m){return new Date(y,m+1,0).getDate();}
 function fdow(y,m){let d=new Date(y,m,1).getDay();return d===0?6:d-1;}
-function curYM(){
-  const now=new Date();let m=now.getMonth()+offset,y=now.getFullYear();
-  while(m<0){m+=12;y--;}while(m>11){m-=12;y++;}return{y,m};
-}
-function nav(d){offset+=d;render();}
 function hexA(hex,a){
   const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
   return `rgba(${r},${g},${b},${a})`;
 }
-
+ 
+function getOffsetYM(offset){
+  const now=new Date();
+  let m=now.getMonth()+offset,y=now.getFullYear();
+  while(m<0){m+=12;y--;}while(m>11){m-=12;y++;}
+  return{y,m};
+}
+ 
 function setTab(t){
   curTab=t;
   ['cal','list'].forEach(x=>{document.getElementById('tb-'+x).className='tbtn'+(x===t?' on':'');});
   document.getElementById('viewCal').style.display=t==='cal'?'':'none';
   document.getElementById('viewList').style.display=t==='list'?'':'none';
-  render();
+  if(t==='list') renderList();
 }
-
-function render(){curTab==='cal'?renderCal():renderList();}
-
+ 
 function getMonthEvs(y,m){
   const res=[],tot=dim(y,m);
   S.events.forEach(ev=>{
@@ -245,55 +238,135 @@ function getMonthEvs(y,m){
   });
   return res;
 }
-
-function renderCal(){
-  const{y,m}=curYM();
-  document.getElementById('monLabel').textContent=MO[m]+' '+y;
-  document.getElementById('wdRow').innerHTML=WD.map(d=>`<div class="wd">${d}</div>`).join('');
-  const tot=dim(y,m),start=fdow(y,m),now=new Date();
+ 
+function renderCalView(){
+  const container=document.getElementById('viewCal');
+  container.innerHTML='';
+  for(let i=0;i<renderedMonths;i++){
+    const{y,m}=getOffsetYM(i);
+    container.appendChild(buildMonthBlock(y,m));
+  }
+  // infinite scroll sentinel
+  const sentinel=document.createElement('div');
+  sentinel.id='sentinel';
+  sentinel.style.height='20px';
+  container.appendChild(sentinel);
+  observeSentinel();
+}
+ 
+function buildMonthBlock(y,m){
+  const now=new Date();
+  const tot=dim(y,m),start=fdow(y,m);
   const evs=getMonthEvs(y,m);
-  const dg=document.getElementById('dGrid');dg.innerHTML='';
-  for(let i=0;i<start;i++){const x=document.createElement('div');x.className='dc';dg.appendChild(x);}
+  const block=document.createElement('div');
+  block.className='month-block';
+  block.dataset.y=y;block.dataset.m=m;
+ 
+  // header
+  const nav=document.createElement('div');
+  nav.className='monthnav';
+  nav.innerHTML=`<span class="monlabel">${MO[m]} ${y}</span>`;
+  block.appendChild(nav);
+ 
+  // weekdays
+  const wdrow=document.createElement('div');
+  wdrow.className='wdrow';
+  wdrow.innerHTML=WD.map(d=>`<div class="wd">${d}</div>`).join('');
+  block.appendChild(wdrow);
+ 
+  // days
+  const dgrid=document.createElement('div');
+  dgrid.className='dgrid';
+  for(let i=0;i<start;i++){const x=document.createElement('div');x.className='dc';dgrid.appendChild(x);}
   for(let d=1;d<=tot;d++){
     const cell=document.createElement('div');
     const isT=now.getDate()===d&&now.getMonth()===m&&now.getFullYear()===y;
     cell.className='dc'+(isT?' today':'');
     let h=`<div class="dn">${d}</div>`;
     if(isT) h+=`<div class="today-dot"></div>`;
-    h+=`<div class="ebars" id="eb${d}"></div>`;
-    cell.innerHTML=h;cell.onclick=()=>showPanel('add',{prefDay:d});dg.appendChild(cell);
+    h+=`<div class="ebars" id="eb_${y}_${m}_${d}"></div>`;
+    cell.innerHTML=h;
+    cell.onclick=()=>showPanel('add',{prefY:y,prefM:m,prefDay:d});
+    dgrid.appendChild(cell);
   }
-  evs.forEach(ev=>{
-    const cat=catById(ev.cat);
-    if(ev._hits){
-      ev._hits.forEach(d=>{
-        const cont=document.getElementById('eb'+d);if(!cont) return;
-        const bar=document.createElement('div');bar.className='ebar single';
-        bar.style.background=hexA(cat.color,0.22);bar.style.color=cat.color;bar.textContent=ev.name;cont.appendChild(bar);
-      });
-    } else {
-      const s=ev.dayStart,e=ev.dayEnd||ev.dayStart;
-      for(let d=s;d<=e&&d<=tot;d++){
-        const cont=document.getElementById('eb'+d);if(!cont) continue;
-        const bar=document.createElement('div');
-        const pos=d===s&&d===e?'single':d===s?'s':d===e?'e':'m';
-        bar.className='ebar '+pos;bar.style.background=hexA(cat.color,0.22);bar.style.color=cat.color;
-        if(d===s) bar.textContent=ev.name;cont.appendChild(bar);
+  block.appendChild(dgrid);
+ 
+  // events
+  if(evs.length){
+    evs.forEach(ev=>{
+      const cat=catById(ev.cat);
+      if(ev._hits){
+        ev._hits.forEach(d=>{
+          const cont=document.getElementById(`eb_${y}_${m}_${d}`);if(!cont) return;
+          const bar=document.createElement('div');bar.className='ebar single';
+          bar.style.background=hexA(cat.color,0.22);bar.style.color=cat.color;bar.textContent=ev.name;cont.appendChild(bar);
+        });
+      } else {
+        const s=ev.dayStart,e=ev.dayEnd||ev.dayStart;
+        for(let d=s;d<=e&&d<=tot;d++){
+          const cont=document.getElementById(`eb_${y}_${m}_${d}`);if(!cont) continue;
+          const bar=document.createElement('div');
+          const pos=d===s&&d===e?'single':d===s?'s':d===e?'e':'m';
+          bar.className='ebar '+pos;bar.style.background=hexA(cat.color,0.22);bar.style.color=cat.color;
+          if(d===s) bar.textContent=ev.name;cont.appendChild(bar);
+        }
       }
-    }
-  });
-  const el=document.getElementById('evListCal');el.innerHTML='';
-  if(!evs.length){el.innerHTML='<div class="empty">нет событий — нажми на день или «+»</div>';return;}
-  evs.sort((a,b)=>a.dayStart-b.dayStart).forEach(ev=>el.appendChild(makeRow(ev,y,m)));
+    });
+ 
+    // event pills below grid
+    const strip=document.createElement('div');
+    strip.className='ev-strip';
+    strip.style.paddingTop='6px';
+    evs.sort((a,b)=>a.dayStart-b.dayStart).forEach(ev=>{
+      const cat=catById(ev.cat);
+      const hasEnd=ev.dayEnd&&ev.dayEnd!==ev.dayStart;
+      const dateStr=hasEnd?`${ev.dayStart}–${ev.dayEnd}`:String(ev.dayStart);
+      const pill=document.createElement('div');
+      pill.className='ev-pill';
+      pill.style.background=hexA(cat.color,0.13);
+      pill.style.color=cat.color;
+      pill.innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:${cat.color};flex-shrink:0;display:inline-block"></span>${ev.name} <span style="opacity:0.7;font-size:10px;margin-left:2px">${dateStr}</span>`;
+      if(!ev._v) pill.onclick=()=>confirmDelete(ev.id);
+      strip.appendChild(pill);
+    });
+    block.appendChild(strip);
+  }
+ 
+  return block;
 }
-
+ 
+function observeSentinel(){
+  const sentinel=document.getElementById('sentinel');
+  if(!sentinel) return;
+  const obs=new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting){
+      renderedMonths+=3;
+      const container=document.getElementById('viewCal');
+      sentinel.remove();
+      for(let i=renderedMonths-3;i<renderedMonths;i++){
+        const{y,m}=getOffsetYM(i);
+        container.appendChild(buildMonthBlock(y,m));
+      }
+      const newSentinel=document.createElement('div');
+      newSentinel.id='sentinel';newSentinel.style.height='20px';
+      container.appendChild(newSentinel);
+      observeSentinel();
+    }
+  },{rootMargin:'200px'});
+  obs.observe(sentinel);
+}
+ 
+function confirmDelete(id){
+  if(confirm('Удалить событие?')){delEv(id);}
+}
+ 
 function renderList(){
   const el=document.getElementById('evListAll');el.innerHTML='';
   if(!S.events.length){el.innerHTML='<div class="empty">событий пока нет</div>';return;}
   [...S.events].sort((a,b)=>a.year!==b.year?a.year-b.year:a.month!==b.month?a.month-b.month:a.dayStart-b.dayStart)
     .forEach(ev=>el.appendChild(makeRow(ev,ev.year,ev.month)));
 }
-
+ 
 function repLabel(ev){
   if(!ev.repeat||ev.repeat==='none') return '';
   if(ev.repeat==='weekly') return 'еженед.';
@@ -301,7 +374,7 @@ function repLabel(ev){
   if(ev.repeat==='custom'&&ev.repeatDow) return ev.repeatDow.map(i=>WD[i]).join(', ');
   return '';
 }
-
+ 
 function makeRow(ev,y,m){
   const cat=catById(ev.cat);
   const hasEnd=ev.dayEnd&&ev.dayEnd!==ev.dayStart;
@@ -314,37 +387,39 @@ function makeRow(ev,y,m){
       <div class="ev-nm">${ev.name}${rl?`<span class="badge">${rl}</span>`:''}</div>
       <div class="ev-mt">${cat.name} · ${dateStr}${yr}</div>
     </div>
-    ${!ev._v?`<button class="ev-del" onclick="delEv(${ev.id})">×</button>`:''}`;
+    <button class="ev-del" onclick="delEv(${ev.id})">×</button>`;
   return row;
 }
-
-function delEv(id){S.events=S.events.filter(e=>e.id!==id);saveData();render();}
-
-function overlayClick(e){if(e.target===document.getElementById('overlay'))closePanel();}
-
-function closePanel(){
-  document.getElementById('overlay').style.display='none';
-  render();
+ 
+function delEv(id){
+  S.events=S.events.filter(e=>e.id!==id);saveData();
+  if(curTab==='cal') renderCalView(); else renderList();
 }
-
+ 
+function overlayClick(e){if(e.target===document.getElementById('overlay'))closePanel();}
+function closePanel(){document.getElementById('overlay').style.display='none';}
+ 
 function showPanel(type,opts){
   opts=opts||{};
   const sh=document.getElementById('sheetInner');
   if(type==='add'){
     selCat=S.cats[0]?.id;selRepeat='none';selDow=[];pickStart=null;pickEnd=null;
-    const{y,m}=curYM();mcOffset=0;
-    if(opts.prefDay) pickStart={y,m,d:opts.prefDay};
-    sh.innerHTML=buildAddSheet(y,m);renderMiniCal();
+    const now=new Date();
+    const baseY=opts.prefY||now.getFullYear();
+    const baseM=opts.prefM!==undefined?opts.prefM:now.getMonth();
+    mcOffset=0;
+    if(opts.prefDay!==undefined) pickStart={y:baseY,m:baseM,d:opts.prefDay};
+    sh.innerHTML=buildAddSheet(baseY,baseM);renderMiniCal();
     setTimeout(()=>{const el=document.getElementById('evN');if(el)el.focus();},300);
   } else if(type==='cats'){
     openCpId=null;sh.innerHTML=buildCatsSheet();
   }
   document.getElementById('overlay').style.display='flex';
 }
-
+ 
 function buildAddSheet(y,m){
   return `<div class="handle"></div>
-  <div class="sh-title">новое событие · ${MO[m]} ${y}</div>
+  <div class="sh-title">новое событие</div>
   <div class="fg"><label class="fl">название</label><input class="finput" type="text" id="evN" placeholder="например, конференция" autocomplete="off"/></div>
   <div class="fg">
     <label class="fl">дата</label>
@@ -363,10 +438,12 @@ function buildAddSheet(y,m){
   </div>
   <div class="mbtns"><button class="bcancel" onclick="closePanel()">отмена</button><button class="bsave" onclick="saveEv()">сохранить</button></div>`;
 }
-
+ 
 function renderMiniCal(){
-  const now=new Date(),base=curYM();
-  let mo=base.y*12+base.m+mcOffset,cy=Math.floor(mo/12),cm=mo%12;
+  const now=new Date();
+  const base=pickStart?{y:pickStart.y,m:pickStart.m}:{y:now.getFullYear(),m:now.getMonth()};
+  let mo=base.y*12+base.m+mcOffset,cy=Math.floor(mo/12),cm=((mo%12)+12)%12;
+  if(mo<0){cy=Math.floor(mo/12);}
   const tot=dim(cy,cm),start=fdow(cy,cm);
   const c=catById(selCat);
   let h=`<div class="mc-nav">
@@ -383,13 +460,13 @@ function renderMiniCal(){
     let st='';
     if(sel) st=`style="background:${c.color}"`;
     else if(inR) st=`style="background:${hexA(c.color,0.18)}"`;
-    h+=`<div class="mc-d${isT&&!sel?' today-d':''}${sel?' sel':''}${inR&&!sel?' in-range':''}" ${st} onclick="pickDay(${cy},${cm},${d})">${d}</div>`;
+    h+=`<div class="mc-d${isT&&!sel?' today-d':''}${sel?' sel':''}" ${st} onclick="pickDay(${cy},${cm},${d})">${d}</div>`;
   }
   h+=`</div>`;
   const mc=document.getElementById('miniCal');if(mc) mc.innerHTML=h;
   updateDateDisp();
 }
-
+ 
 function isSel(y,m,d){
   if(pickStart&&pickStart.y===y&&pickStart.m===m&&pickStart.d===d) return true;
   if(pickEnd&&pickEnd.y===y&&pickEnd.m===m&&pickEnd.d===d) return true;
@@ -419,12 +496,12 @@ function updateDateDisp(){
   const fmt=p=>`${p.d} ${MO_G[p.m]}${p.y!==new Date().getFullYear()?' '+p.y:''}`;
   el.textContent=pickEnd?`${fmt(pickStart)} — ${fmt(pickEnd)}`:fmt(pickStart);
 }
-
+ 
 function buildChips(){
   return S.cats.map(c=>`<div class="chip" style="background:${hexA(c.color,c.id===selCat?0.22:0.08)};color:${c.color};border-color:${c.id===selCat?c.color:'transparent'}" onclick="pickCat('${c.id}')">${c.name}</div>`).join('');
 }
 function pickCat(id){selCat=id;const el=document.getElementById('catChips');if(el)el.innerHTML=buildChips();renderMiniCal();}
-
+ 
 function pickRepeat(r){
   selRepeat=r;
   ['none','weekly','monthly','custom'].forEach(x=>{const el=document.getElementById('ropt-'+x);if(el)el.className='ropt'+(x===r?' on':'');});
@@ -439,22 +516,22 @@ function toggleDow(i){
     el.style.color=on?c.color:'';el.style.background=on?hexA(c.color,0.15):'';el.style.borderColor=on?c.color:'';
   });
 }
-
+ 
 function saveEv(){
   const name=document.getElementById('evN').value.trim();
   if(!name||!pickStart) return;
   const ds=pickStart.d,de=pickEnd?pickEnd.d:pickStart.d,y=pickStart.y,m=pickStart.m;
   const repeat=selRepeat==='custom'&&selDow.length?'custom':selRepeat==='custom'?'none':selRepeat;
   S.events.push({id:Date.now(),name,year:y,month:m,dayStart:ds,dayEnd:de,cat:selCat||S.cats[0]?.id,repeat,repeatDow:[...selDow]});
-  saveData();closePanel();
+  saveData();closePanel();renderCalView();
 }
-
+ 
 function buildCatsSheet(){
   return `<div class="handle"></div>
   <div class="sh-title">категории</div>
   <div id="catMgr">${buildCatRows()}</div>
   <button class="addcatbtn" onclick="addCat()">+ новая категория</button>
-  <div class="mbtns" style="margin-top:1rem;"><button class="bsave" onclick="closePanel()">готово</button></div>`;
+  <div class="mbtns" style="margin-top:1rem;"><button class="bsave" onclick="closePanel();renderCalView();">готово</button></div>`;
 }
 function buildCatRows(){
   return S.cats.map(c=>`
@@ -473,9 +550,10 @@ function renameCat(id,name){const c=S.cats.find(x=>x.id===id);if(c){c.name=name;
 function delCat(id){S.cats=S.cats.filter(c=>c.id!==id);saveData();refreshCatMgr();}
 function addCat(){S.cats.push({id:'c'+Date.now(),name:'новая',color:PAL[S.cats.length%PAL.length]});saveData();refreshCatMgr();}
 function refreshCatMgr(){const el=document.getElementById('catMgr');if(el)el.innerHTML=buildCatRows();}
-
+ 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel();});
-render();
+renderCalView();
 </script>
 </body>
 </html>
+ 
