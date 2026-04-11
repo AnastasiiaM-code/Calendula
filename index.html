@@ -215,7 +215,16 @@ function getMonthEvs(y,m){
   const res=[],tot=dim(y,m);
   S.events.forEach(ev=>{
     if(!ev.repeat||ev.repeat==='none'){
-      if(ev.year===y&&ev.month===m)res.push({...ev});
+      const startTs=new Date(ev.year,ev.month,ev.dayStart).getTime();
+      const endTs=new Date(ev.endYear||ev.year,ev.endMonth!=null?ev.endMonth:ev.month,ev.dayEnd||ev.dayStart).getTime();
+      const mStart=new Date(y,m,1).getTime();
+      const mEnd=new Date(y,m,tot,23,59,59).getTime();
+      if(startTs<=mEnd&&endTs>=mStart){
+        // clip to this month
+        const ds=ev.year===y&&ev.month===m?ev.dayStart:1;
+        const de=(ev.endYear||ev.year)===y&&(ev.endMonth!=null?ev.endMonth:ev.month)===m?(ev.dayEnd||ev.dayStart):tot;
+        res.push({...ev,_dispStart:ds,_dispEnd:de});
+      }
     } else if(ev.repeat==='weekly'){
       const sd=new Date(ev.year,ev.month,ev.dayStart);
       for(let d=1;d<=tot;d++){
@@ -303,7 +312,7 @@ function buildMonthBlock(y,m){
  
   // assign tracks (which vertical slot each event occupies per row)
   // Simple approach: sort events by start, assign slot greedily
-  const sorted=[...evs].sort((a,b)=>a.dayStart-b.dayStart);
+  const sorted=[...evs].sort((a,b)=>(a._dispStart||a.dayStart)-(b._dispStart||b.dayStart));
   // track occupancy: rowSlots[row][slot] = last day occupied
   const rowSlots={};
   function getSlot(startRow,endRow,startCol,endCol,startD,endD){
@@ -339,7 +348,7 @@ function buildMonthBlock(y,m){
         segments.push({startD:d,endD:d});
       });
     } else {
-      const s=ev.dayStart,e=Math.min(ev.dayEnd||ev.dayStart,tot);
+      const s=ev._dispStart||ev.dayStart,e=Math.min(ev._dispEnd||ev.dayEnd||ev.dayStart,tot);
       // split into week rows
       let cur=s;
       while(cur<=e){
@@ -358,8 +367,8 @@ function buildMonthBlock(y,m){
  
       const bar=document.createElement('div');
       const isSingle=startD===endD;
-      const isStart=startD===ev.dayStart||(ev._hits);
-      const isEnd=endD===(ev.dayEnd||ev.dayStart)||(ev._hits);
+      const isStart=(ev._dispStart?startD===ev._dispStart:startD===ev.dayStart)||(ev._hits);
+      const isEnd=(ev._dispEnd?endD===ev._dispEnd:endD===(ev.dayEnd||ev.dayStart))||(ev._hits);
       let cls='ev-bar-row';
       if(maybe)cls+=' maybe';
       else if(isSingle)cls+=' single';
@@ -403,8 +412,9 @@ function buildMonthBlock(y,m){
     [...evs].sort((a,b)=>a.dayStart-b.dayStart).forEach(ev=>{
       const cat=catById(ev.cat);
       const maybe=!!ev.maybe;
-      const hasEnd=ev.dayEnd&&ev.dayEnd!==ev.dayStart;
-      const dateStr=hasEnd?`${ev.dayStart}–${ev.dayEnd}`:String(ev.dayStart);
+      const hasEnd=ev.dayEnd&&(ev.dayEnd!==ev.dayStart||ev.endMonth!==ev.month||ev.endYear!==ev.year);
+      const isCrossMonth=hasEnd&&(ev.endMonth!=null&&ev.endMonth!==ev.month);
+      const dateStr=hasEnd?(isCrossMonth?`${ev.dayStart} ${MO_G[ev.month]}–${ev.dayEnd} ${MO_G[ev.endMonth!=null?ev.endMonth:ev.month]}`:`${ev.dayStart}–${ev.dayEnd}`):String(ev.dayStart);
       const pill=document.createElement('div');
       pill.className='ev-pill'+(maybe?' maybe':'');
       pill.style.background=maybe?'transparent':hexA(cat.color,0.13);
@@ -520,7 +530,7 @@ function showPanel(type,opts){
     selDow=[...(ev.repeatDow||[])];
     isMaybe=!!ev.maybe;
     pickStart={y:ev.year,m:ev.month,d:ev.dayStart};
-    pickEnd=(ev.dayEnd&&ev.dayEnd!==ev.dayStart)?{y:ev.year,m:ev.month,d:ev.dayEnd}:null;
+    pickEnd=(ev.dayEnd&&(ev.dayEnd!==ev.dayStart||ev.endMonth!==ev.month||ev.endYear!==ev.year))?{y:ev.endYear||ev.year,m:ev.endMonth!=null?ev.endMonth:ev.month,d:ev.dayEnd}:null;
     const now2=new Date();
     mcOffset=(ev.year-now2.getFullYear())*12+(ev.month-now2.getMonth());
     sh.innerHTML=buildAddSheet(ev.name);renderMiniCal();
@@ -638,14 +648,15 @@ function toggleDow(i){
 function saveEv(){
   const name=document.getElementById('evN').value.trim();
   if(!name||!pickStart)return;
-  const ds=pickStart.d,y=pickStart.y,m=pickStart.m;
-  const de=pickEnd?(pickEnd.y===y&&pickEnd.m===m?pickEnd.d:pickStart.d):pickStart.d;
+  const sy=pickStart.y,sm=pickStart.m,sd=pickStart.d;
+  const ey=pickEnd?pickEnd.y:sy,em=pickEnd?pickEnd.m:sm,ed=pickEnd?pickEnd.d:sd;
   const repeat=selRepeat==='custom'&&selDow.length?'custom':selRepeat==='custom'?'none':selRepeat;
+  const evData={name,year:sy,month:sm,dayStart:sd,endYear:ey,endMonth:em,dayEnd:ed,cat:selCat||S.cats[0]?.id,repeat,repeatDow:[...selDow],maybe:isMaybe};
   if(editId){
     const idx=S.events.findIndex(e=>e.id===editId);
-    if(idx!==-1)S.events[idx]={...S.events[idx],name,year:y,month:m,dayStart:ds,dayEnd:de,cat:selCat||S.cats[0]?.id,repeat,repeatDow:[...selDow],maybe:isMaybe};
+    if(idx!==-1)S.events[idx]={...S.events[idx],...evData};
   } else {
-    S.events.push({id:Date.now(),name,year:y,month:m,dayStart:ds,dayEnd:de,cat:selCat||S.cats[0]?.id,repeat,repeatDow:[...selDow],maybe:isMaybe});
+    S.events.push({id:Date.now(),...evData});
   }
   saveData();closePanel();renderCalView();
 }
