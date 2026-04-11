@@ -11,14 +11,15 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@300;400;500&display=swap');
 :root{
-  --bg:#ffffff;--bg2:#f7f5f2;--bg3:#f0ede8;
+  --bg:#ffffff;--bg2:#f7f5f2;
   --text:#1a1a1a;--text2:#6b6b6b;--text3:#aaa;
   --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
   --accent:#8B6A4A;--accent-fg:#F5EDE0;
   --radius:10px;--radius-lg:14px;
+  --cell:14.2857%;
 }
 @media(prefers-color-scheme:dark){:root{
-  --bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;
+  --bg:#1c1c1e;--bg2:#2c2c2e;
   --text:#f2f2f7;--text2:#aeaeb2;--text3:#636366;
   --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.18);
 }}
@@ -33,28 +34,39 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 .tbtn.on{color:var(--text);border-bottom-color:var(--text);}
 .tbtn.plus{color:var(--accent);}
 .scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.month-block{padding:0 0 1.5rem;}
+.month-block{padding:0 0 1.2rem;}
 .month-block+.month-block{border-top:0.5px solid var(--border);}
 .monlabel{font-family:'Playfair Display',serif;font-size:20px;font-weight:400;color:var(--text);padding:0.8rem 1rem 0.4rem;display:block;}
-.wdrow{display:grid;grid-template-columns:repeat(7,1fr);padding:0 0.6rem;gap:2px;}
+ 
+/* calendar grid */
+.wdrow{display:grid;grid-template-columns:repeat(7,1fr);padding:0 0.5rem;gap:0;}
 .wd{font-size:10px;text-align:center;color:var(--text3);letter-spacing:0.3px;text-transform:uppercase;padding:3px 0;}
-.dgrid{display:grid;grid-template-columns:repeat(7,1fr);padding:0 0.6rem;gap:2px;}
-.dc{min-height:50px;border-radius:6px;padding:4px 2px 2px;cursor:pointer;position:relative;}
+ 
+/* grid wrapper — relative so we can overlay bars */
+.cal-wrap{position:relative;padding:0 0.5rem;}
+.dgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:0;}
+.dc{height:52px;border-radius:6px;padding:5px 3px 0;cursor:pointer;position:relative;}
 .dc:active{background:var(--bg2);}
 .dn{font-size:11px;color:var(--text2);text-align:center;line-height:1;}
 .dc.today .dn{color:var(--accent);font-weight:500;}
 .today-dot{width:4px;height:4px;border-radius:50%;background:var(--accent);margin:2px auto 0;}
-.ebars{display:flex;flex-direction:column;gap:1px;margin-top:2px;}
-.ebar{height:11px;border-radius:3px;font-size:8px;line-height:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 3px;}
-.ebar.s{border-radius:4px 0 0 4px;}
-.ebar.m{border-radius:0;margin:0 -1px;}
-.ebar.e{border-radius:0 4px 4px 0;}
-.ebar.single{border-radius:4px;}
-.ebar.maybe{opacity:0.45;border:1px dashed currentColor;background:transparent!important;}
-.ev-strip{padding:6px 0.75rem 0;display:flex;flex-wrap:wrap;gap:4px;}
+ 
+/* event bars overlay — rendered as absolutely positioned divs over the grid */
+.bars-overlay{position:absolute;top:0;left:0.5rem;right:0.5rem;pointer-events:none;}
+.ev-bar-row{position:absolute;height:13px;border-radius:3px;font-size:8px;line-height:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px;pointer-events:all;cursor:pointer;}
+.ev-bar-row.maybe{background:transparent!important;border:1px dashed currentColor;opacity:0.5;}
+.ev-bar-row.start{border-radius:4px 0 0 4px;}
+.ev-bar-row.end{border-radius:0 4px 4px 0;}
+.ev-bar-row.mid{border-radius:0;}
+.ev-bar-row.single{border-radius:4px;}
+ 
+/* event pills */
+.ev-strip{padding:4px 0.75rem 0;display:flex;flex-wrap:wrap;gap:4px;}
 .ev-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;cursor:pointer;}
 .ev-pill:active{opacity:0.7;}
-.ev-pill.maybe{opacity:0.6;border:1px dashed currentColor;}
+.ev-pill.maybe{opacity:0.55;border-style:dashed!important;}
+ 
+/* list */
 .sec-label{font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text3);padding:0.9rem 1rem 0.35rem;}
 .evlist{padding:0 1rem 1rem;}
 .ev-row{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;background:var(--bg);border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:5px;}
@@ -66,6 +78,8 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 .badge{font-size:9px;background:var(--bg2);color:var(--text3);padding:1px 5px;border-radius:10px;margin-left:4px;vertical-align:middle;}
 .maybe-badge{font-size:9px;color:var(--text3);padding:1px 5px;border-radius:10px;margin-left:4px;vertical-align:middle;border:1px dashed var(--text3);}
 .empty{font-size:12px;color:var(--text3);padding:0.5rem 0;}
+ 
+/* sheet */
 .overlay{background:rgba(0,0,0,0.4);position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center;}
 .sheet{background:var(--bg);border-radius:18px 18px 0 0;padding:1rem 1.25rem;padding-bottom:calc(1.5rem + env(safe-area-inset-bottom));width:100%;max-width:430px;border-top:0.5px solid var(--border2);max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 1rem;}
@@ -104,7 +118,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 .ropt.on{background:var(--bg2);border-color:var(--text2);color:var(--text);font-weight:500;}
 .dow-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
 .dow-pill{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;border:1.5px solid var(--border2);color:var(--text2);background:none;font-family:'Inter',sans-serif;}
-.mbtns{display:flex;gap:8px;margin-top:1rem;}
+.mbtns{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap;}
 .bsave{flex:1;padding:12px;background:var(--accent);color:var(--accent-fg);border:none;border-radius:var(--radius);font-size:15px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;}
 .bsave:active{opacity:0.85;}
 .bcancel{padding:12px 16px;background:none;border:0.5px solid var(--border2);border-radius:var(--radius);font-size:15px;cursor:pointer;color:var(--text2);font-family:'Inter',sans-serif;}
@@ -118,6 +132,8 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 .cpdot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
 .cpdot.on{border-color:var(--text);}
 .addcatbtn{display:flex;align-items:center;gap:6px;background:none;border:0.5px dashed var(--border2);border-radius:var(--radius);padding:8px 12px;width:100%;cursor:pointer;font-size:13px;color:var(--text2);font-family:'Inter',sans-serif;margin-top:8px;}
+.bdanger{flex:1;padding:12px;background:none;border:0.5px solid #E57373;border-radius:var(--radius);font-size:15px;cursor:pointer;color:#E57373;font-family:'Inter',sans-serif;}
+.bdanger:active{background:#fdecea;}
 </style>
 </head>
 <body>
@@ -137,7 +153,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
       <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="9" y1="3" x2="9" y2="15"/><line x1="3" y1="9" x2="15" y2="9"/></svg>
     </button>
   </div>
-  <div class="scroll-area" id="scrollArea">
+  <div class="scroll-area">
     <div id="viewCal"></div>
     <div id="viewList" style="display:none;">
       <div class="sec-label">все события</div>
@@ -145,17 +161,20 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
     </div>
   </div>
 </div>
-
 <div id="overlay" class="overlay" style="display:none;" onclick="overlayClick(event)">
   <div class="sheet" id="sheetInner" onclick="event.stopPropagation()"></div>
 </div>
-
+ 
 <script>
 const MO=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 const MO_G=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const WD=['пн','вт','ср','чт','пт','сб','вс'];
 const PAL=['#E57373','#F06292','#BA68C8','#7986CB','#4DB6AC','#81C784','#FFB74D','#A1887F','#90A4AE','#64B5F6','#4DD0E1','#AED581'];
-
+const CELL_H=52; // must match .dc height in CSS
+const BAR_H=13;
+const BAR_GAP=2;
+const BAR_TOP_OFFSET=20; // below day number
+ 
 function loadData(){
   try{const d=localStorage.getItem('mycal_v3');if(d)return JSON.parse(d);}catch(e){}
   return{events:[],cats:[
@@ -166,12 +185,12 @@ function loadData(){
   ]};
 }
 function saveData(){try{localStorage.setItem('mycal_v3',JSON.stringify(S));}catch(e){}}
-
+ 
 let S=loadData();
 let curTab='cal',openCpId=null;
-let selCat=null,selRepeat='none',selDow=[],mcOffset=0,pickStart=null,pickEnd=null,isMaybe=false;
+let selCat=null,selRepeat='none',selDow=[],mcOffset=0,pickStart=null,pickEnd=null,isMaybe=false,editId=null;
 let renderedMonths=14;
-
+ 
 function catById(id){return S.cats.find(c=>c.id===id)||{name:'?',color:'#aaa'};}
 function dim(y,m){return new Date(y,m+1,0).getDate();}
 function fdow(y,m){let d=new Date(y,m,1).getDay();return d===0?6:d-1;}
@@ -180,12 +199,10 @@ function hexA(hex,a){
   return `rgba(${r},${g},${b},${a})`;
 }
 function getOffsetYM(off){
-  const now=new Date();
-  let m=now.getMonth()+off,y=now.getFullYear();
-  while(m<0){m+=12;y--;}while(m>11){m-=12;y++;}
-  return{y,m};
+  const now=new Date();let m=now.getMonth()+off,y=now.getFullYear();
+  while(m<0){m+=12;y--;}while(m>11){m-=12;y++;}return{y,m};
 }
-
+ 
 function setTab(t){
   curTab=t;
   ['cal','list'].forEach(x=>document.getElementById('tb-'+x).className='tbtn'+(x===t?' on':''));
@@ -193,11 +210,11 @@ function setTab(t){
   document.getElementById('viewList').style.display=t==='list'?'':'none';
   if(t==='list')renderList();
 }
-
+ 
 function getMonthEvs(y,m){
   const res=[],tot=dim(y,m);
   S.events.forEach(ev=>{
-    if(ev.repeat==='none'||!ev.repeat){
+    if(!ev.repeat||ev.repeat==='none'){
       if(ev.year===y&&ev.month===m)res.push({...ev});
     } else if(ev.repeat==='weekly'){
       const sd=new Date(ev.year,ev.month,ev.dayStart);
@@ -218,7 +235,7 @@ function getMonthEvs(y,m){
   });
   return res;
 }
-
+ 
 function renderCalView(){
   const container=document.getElementById('viewCal');
   container.innerHTML='';
@@ -228,86 +245,162 @@ function renderCalView(){
   }
   appendSentinel(container);
 }
-
+ 
 function buildMonthBlock(y,m){
   const now=new Date();
-  const tot=dim(y,m),start=fdow(y,m);
+  const tot=dim(y,m),startWd=fdow(y,m);
   const evs=getMonthEvs(y,m);
-
+ 
   const block=document.createElement('div');
   block.className='month-block';
-
-  // label
+ 
   const lbl=document.createElement('span');
   lbl.className='monlabel';
   lbl.textContent=MO[m]+' '+y;
   block.appendChild(lbl);
-
-  // weekdays header
+ 
   const wdrow=document.createElement('div');
   wdrow.className='wdrow';
   WD.forEach(d=>{const x=document.createElement('div');x.className='wd';x.textContent=d;wdrow.appendChild(x);});
   block.appendChild(wdrow);
-
-  // days grid — build cells array first, then place events into them
+ 
+  // wrapper for grid + overlay
+  const wrap=document.createElement('div');
+  wrap.className='cal-wrap';
+ 
   const dgrid=document.createElement('div');
   dgrid.className='dgrid';
-
-  // blank cells
-  for(let i=0;i<start;i++){const x=document.createElement('div');x.className='dc';dgrid.appendChild(x);}
-
-  // day cells — store refs by day number
-  const dayCells={};
+ 
+  // positions: col and row for each day (0-indexed)
+  const dayPos={}; // day -> {col, row}
+  let pos=startWd;
+  for(let i=0;i<startWd;i++){const x=document.createElement('div');x.className='dc';dgrid.appendChild(x);}
   for(let d=1;d<=tot;d++){
     const cell=document.createElement('div');
     const isT=now.getDate()===d&&now.getMonth()===m&&now.getFullYear()===y;
     cell.className='dc'+(isT?' today':'');
-    const numDiv=document.createElement('div');numDiv.className='dn';numDiv.textContent=d;
-    cell.appendChild(numDiv);
+    const numDiv=document.createElement('div');numDiv.className='dn';numDiv.textContent=d;cell.appendChild(numDiv);
     if(isT){const dot=document.createElement('div');dot.className='today-dot';cell.appendChild(dot);}
-    const ebars=document.createElement('div');ebars.className='ebars';
-    cell.appendChild(ebars);
-    cell.onclick=()=>showPanel('add',{prefY:y,prefM:m,prefDay:d});
-    dayCells[d]=ebars;
+    cell.onclick=(()=>{const _d=d,_y=y,_m=m;return (evt)=>{
+      if(evt.target.closest('.ev-bar-row'))return;
+      const dayEvs=S.events.filter(e=>e.year===_y&&e.month===_m&&_d>=e.dayStart&&_d<=(e.dayEnd||e.dayStart));
+      if(dayEvs.length===1){showPanel('edit',{id:dayEvs[0].id});}
+      else if(dayEvs.length>1){showDaySheet(_y,_m,_d,dayEvs);}
+      else{showPanel('add',{prefY:_y,prefM:_m,prefDay:_d});}
+    };})();
     dgrid.appendChild(cell);
+    dayPos[d]={col:pos%7,row:Math.floor(pos/7)};
+    pos++;
   }
-  block.appendChild(dgrid);
-
-  // now place event bars into cells
-  evs.forEach(ev=>{
+  wrap.appendChild(dgrid);
+ 
+  // overlay for bars
+  const overlay=document.createElement('div');
+  overlay.className='bars-overlay';
+  // We need the grid to be rendered to get cell width.
+  // Use percentage-based positioning instead.
+  // col width = 100/7 %, row height = CELL_H px
+ 
+  // assign tracks (which vertical slot each event occupies per row)
+  // Simple approach: sort events by start, assign slot greedily
+  const sorted=[...evs].sort((a,b)=>a.dayStart-b.dayStart);
+  // track occupancy: rowSlots[row][slot] = last day occupied
+  const rowSlots={};
+  function getSlot(startRow,endRow,startCol,endCol,startD,endD){
+    // find a free slot across all rows this event spans
+    for(let slot=0;slot<4;slot++){
+      let free=true;
+      for(let r=startRow;r<=endRow;r++){
+        if(!rowSlots[r])rowSlots[r]=[];
+        // check if slot occupied in this row overlapping our days
+        if(rowSlots[r][slot]!==undefined&&rowSlots[r][slot]>=startD){free=false;break;}
+      }
+      if(free){
+        for(let r=startRow;r<=endRow;r++){
+          if(!rowSlots[r])rowSlots[r]=[];
+          rowSlots[r][slot]=endD;
+        }
+        return slot;
+      }
+    }
+    return 0;
+  }
+ 
+  sorted.forEach(ev=>{
     const cat=catById(ev.cat);
     const maybe=!!ev.maybe;
-    if(ev._hits){
-      ev._hits.forEach(d=>{
-        if(!dayCells[d])return;
-        const bar=document.createElement('div');
-        bar.className='ebar single'+(maybe?' maybe':'');
-        bar.style.background=maybe?'transparent':hexA(cat.color,0.22);
-        bar.style.color=cat.color;
-        bar.textContent=ev.name;
-        dayCells[d].appendChild(bar);
+    const days=ev._hits||null;
+    const segments=[];
+ 
+    if(days){
+      // custom repeat: each hit is its own single-day segment
+      days.forEach(d=>{
+        if(!dayPos[d])return;
+        segments.push({startD:d,endD:d});
       });
     } else {
       const s=ev.dayStart,e=Math.min(ev.dayEnd||ev.dayStart,tot);
-      for(let d=s;d<=e;d++){
-        if(!dayCells[d])continue;
-        const bar=document.createElement('div');
-        const single=s===e;
-        const pos=single?'single':d===s?'s':d===e?'e':'m';
-        bar.className='ebar '+pos+(maybe?' maybe':'');
-        bar.style.background=maybe?'transparent':hexA(cat.color,0.22);
-        bar.style.color=cat.color;
-        if(d===s)bar.textContent=ev.name;
-        dayCells[d].appendChild(bar);
+      // split into week rows
+      let cur=s;
+      while(cur<=e){
+        const p=dayPos[cur];if(!p)break;
+        const rowEnd=Math.min(e,cur+(6-p.col)); // last day in this row
+        segments.push({startD:cur,endD:rowEnd});
+        cur=rowEnd+1;
       }
     }
+ 
+    segments.forEach(({startD,endD})=>{
+      if(!dayPos[startD]||!dayPos[endD])return;
+      const {row:startRow,col:startCol}=dayPos[startD];
+      const {row:endRow,col:endCol}=dayPos[endD];
+      const slot=getSlot(startRow,endRow,startCol,endCol,startD,endD);
+ 
+      const bar=document.createElement('div');
+      const isSingle=startD===endD;
+      const isStart=startD===ev.dayStart||(ev._hits);
+      const isEnd=endD===(ev.dayEnd||ev.dayStart)||(ev._hits);
+      let cls='ev-bar-row';
+      if(maybe)cls+=' maybe';
+      else if(isSingle)cls+=' single';
+      else if(isStart&&isEnd)cls+=' single';
+      else if(isStart)cls+=' start';
+      else if(isEnd)cls+=' end';
+      else cls+=' mid';
+      bar.className=cls;
+ 
+      const cellW=100/7;
+      const left=startCol*cellW;
+      const right=(6-endCol)*cellW;
+      const top=startRow*CELL_H+BAR_TOP_OFFSET+slot*(BAR_H+BAR_GAP);
+ 
+      bar.style.left=left+'%';
+      bar.style.right=right+'%';
+      bar.style.top=top+'px';
+      if(!maybe){
+        bar.style.background=hexA(cat.color,0.25);
+      }
+      bar.style.color=cat.color;
+      if(isStart||isSingle)bar.textContent=ev.name;
+      if(!ev._v)bar.onclick=e=>{e.stopPropagation();showPanel('edit',{id:ev.id});};
+      overlay.appendChild(bar);
+    });
   });
-
-  // event pills
+  wrap.appendChild(overlay);
+ 
+  // set grid height = rows * CELL_H
+  const rows=Math.ceil((startWd+tot)/7);
+  dgrid.style.height=(rows*CELL_H)+'px';
+  dgrid.style.gridAutoRows=CELL_H+'px';
+  overlay.style.height=(rows*CELL_H)+'px';
+ 
+  block.appendChild(wrap);
+ 
+  // pills
   if(evs.length){
     const strip=document.createElement('div');
     strip.className='ev-strip';
-    evs.sort((a,b)=>a.dayStart-b.dayStart).forEach(ev=>{
+    [...evs].sort((a,b)=>a.dayStart-b.dayStart).forEach(ev=>{
       const cat=catById(ev.cat);
       const maybe=!!ev.maybe;
       const hasEnd=ev.dayEnd&&ev.dayEnd!==ev.dayStart;
@@ -318,24 +411,18 @@ function buildMonthBlock(y,m){
       pill.style.color=cat.color;
       if(maybe)pill.style.border=`1px dashed ${cat.color}`;
       const dot=document.createElement('span');
-      dot.style.cssText=`width:6px;height:6px;border-radius:50%;background:${cat.color};flex-shrink:0;display:inline-block;${maybe?'opacity:0.5':''}`;
+      dot.style.cssText=`width:6px;height:6px;border-radius:50%;background:${cat.color};flex-shrink:0;display:inline-block${maybe?';opacity:0.5':''}`;
       pill.appendChild(dot);
-      const txt=document.createElement('span');
-      txt.textContent=ev.name+' ';
-      pill.appendChild(txt);
-      const dt=document.createElement('span');
-      dt.style.cssText='opacity:0.6;font-size:10px;margin-left:1px';
-      dt.textContent=dateStr;
-      pill.appendChild(dt);
-      if(!ev._v)pill.onclick=()=>{if(confirm('Удалить событие?'))delEv(ev.id);};
+      const txt=document.createElement('span');txt.textContent=' '+ev.name+' ';pill.appendChild(txt);
+      const dt=document.createElement('span');dt.style.cssText='opacity:0.6;font-size:10px';dt.textContent=dateStr;pill.appendChild(dt);
+      pill.onclick=()=>showPanel('edit',{id:ev.id});pill.style.cursor='pointer';
       strip.appendChild(pill);
     });
     block.appendChild(strip);
   }
-
   return block;
 }
-
+ 
 function appendSentinel(container){
   const s=document.createElement('div');s.id='sentinel';s.style.height='20px';container.appendChild(s);
   const obs=new IntersectionObserver(entries=>{
@@ -350,14 +437,14 @@ function appendSentinel(container){
   },{rootMargin:'300px'});
   obs.observe(s);
 }
-
+ 
 function renderList(){
   const el=document.getElementById('evListAll');el.innerHTML='';
   if(!S.events.length){el.innerHTML='<div class="empty">событий пока нет</div>';return;}
   [...S.events].sort((a,b)=>a.year!==b.year?a.year-b.year:a.month!==b.month?a.month-b.month:a.dayStart-b.dayStart)
     .forEach(ev=>el.appendChild(makeRow(ev)));
 }
-
+ 
 function repLabel(ev){
   if(!ev.repeat||ev.repeat==='none')return '';
   if(ev.repeat==='weekly')return 'еженед.';
@@ -365,33 +452,57 @@ function repLabel(ev){
   if(ev.repeat==='custom'&&ev.repeatDow)return ev.repeatDow.map(i=>WD[i]).join(', ');
   return '';
 }
-
+ 
 function makeRow(ev){
-  const y=ev.year,m=ev.month;
   const cat=catById(ev.cat);
+  const y=ev.year,m=ev.month;
   const hasEnd=ev.dayEnd&&ev.dayEnd!==ev.dayStart;
   const dateStr=hasEnd?`${ev.dayStart}–${ev.dayEnd} ${MO_G[m]}`:`${ev.dayStart} ${MO_G[m]}`;
   const yr=y!==new Date().getFullYear()?` ${y}`:'';
   const rl=repLabel(ev);
   const row=document.createElement('div');row.className='ev-row';
-  row.innerHTML=`<div class="ev-col" style="background:${cat.color};${ev.maybe?'opacity:0.5':''}"></div>
+  row.innerHTML=`<div class="ev-col" style="background:${cat.color}${ev.maybe?';opacity:0.5':''}"></div>
     <div class="ev-body">
       <div class="ev-nm">${ev.name}${ev.maybe?'<span class="maybe-badge">возможно</span>':''}${rl?`<span class="badge">${rl}</span>`:''}</div>
       <div class="ev-mt">${cat.name} · ${dateStr}${yr}</div>
     </div>
-    <button class="ev-del" onclick="delEv(${ev.id})">×</button>`;
+    <button class="ev-del" onclick="showPanel('edit',{id:${ev.id}})">&#8943;</button>`;
   return row;
 }
-
+ 
 function delEv(id){S.events=S.events.filter(e=>e.id!==id);saveData();if(curTab==='cal')renderCalView();else renderList();}
-
+ 
+function showDaySheet(y,m,d,evs){
+  const sh=document.getElementById('sheetInner');
+  const dayLabel=`${d} ${MO_G[m]}`;
+  let html=`<div class="handle"></div><div class="sh-title">${dayLabel}</div>`;
+  evs.forEach(ev=>{
+    const cat=catById(ev.cat);
+    const maybe=!!ev.maybe;
+    const hasEnd=ev.dayEnd&&ev.dayEnd!==ev.dayStart;
+    const dateStr=hasEnd?`${ev.dayStart}–${ev.dayEnd}`:'';
+    html+=`<div class="ev-row" style="cursor:pointer" onclick="showPanel('edit',{id:${ev.id}})">
+      <div class="ev-col" style="background:${cat.color}${maybe?';opacity:0.5':''}"></div>
+      <div class="ev-body">
+        <div class="ev-nm">${ev.name}${maybe?'<span class="maybe-badge">возможно</span>':''}</div>
+        <div class="ev-mt">${cat.name}${dateStr?' · '+dateStr:''}</div>
+      </div>
+      <div style="color:var(--text3);font-size:13px;padding:0 4px;">›</div>
+    </div>`;
+  });
+  html+=`<div class="mbtns"><button class="bsave" onclick="showPanel('add',{prefY:${y},prefM:${m},prefDay:${d}})">+ добавить событие</button></div>`;
+  sh.innerHTML=html;
+  document.getElementById('overlay').style.display='flex';
+}
+ 
 function overlayClick(e){if(e.target===document.getElementById('overlay'))closePanel();}
 function closePanel(){document.getElementById('overlay').style.display='none';}
-
+ 
 function showPanel(type,opts){
   opts=opts||{};
   const sh=document.getElementById('sheetInner');
   if(type==='add'){
+    editId=null;
     selCat=S.cats[0]?.id;selRepeat='none';selDow=[];pickStart=null;pickEnd=null;isMaybe=false;
     const now=new Date();
     const baseY=opts.prefY||now.getFullYear();
@@ -400,16 +511,40 @@ function showPanel(type,opts){
     if(opts.prefDay!==undefined)pickStart={y:baseY,m:baseM,d:opts.prefDay};
     sh.innerHTML=buildAddSheet();renderMiniCal();
     setTimeout(()=>{const el=document.getElementById('evN');if(el)el.focus();},300);
+  } else if(type==='edit'){
+    const ev=S.events.find(e=>e.id===opts.id);
+    if(!ev)return;
+    editId=ev.id;
+    selCat=ev.cat;
+    selRepeat=ev.repeat||'none';
+    selDow=[...(ev.repeatDow||[])];
+    isMaybe=!!ev.maybe;
+    pickStart={y:ev.year,m:ev.month,d:ev.dayStart};
+    pickEnd=(ev.dayEnd&&ev.dayEnd!==ev.dayStart)?{y:ev.year,m:ev.month,d:ev.dayEnd}:null;
+    const now2=new Date();
+    mcOffset=(ev.year-now2.getFullYear())*12+(ev.month-now2.getMonth());
+    sh.innerHTML=buildAddSheet(ev.name);renderMiniCal();
+    // restore dow pill colors without toggling
+    if(selRepeat==='custom'){
+      WD.forEach((_,j)=>{
+        const el=document.getElementById('dp'+j);if(!el)return;
+        const on=selDow.includes(j),c=catById(selCat);
+        el.className='dow-pill'+(on?' on':'');
+        el.style.color=on?c.color:'';el.style.background=on?hexA(c.color,0.15):'';el.style.borderColor=on?c.color:'';
+      });
+    }
+    setTimeout(()=>{const el=document.getElementById('evN');if(el)el.focus();},300);
   } else if(type==='cats'){
     openCpId=null;sh.innerHTML=buildCatsSheet();
   }
   document.getElementById('overlay').style.display='flex';
 }
-
-function buildAddSheet(){
+ 
+function buildAddSheet(prefName){
+  const isEdit=!!editId;
   return `<div class="handle"></div>
-  <div class="sh-title">новое событие</div>
-  <div class="fg"><label class="fl">название</label><input class="finput" type="text" id="evN" placeholder="например, конференция" autocomplete="off"/></div>
+  <div class="sh-title">${isEdit?'редактировать':'новое событие'}</div>
+  <div class="fg"><label class="fl">название</label><input class="finput" type="text" id="evN" placeholder="например, конференция" autocomplete="off" value="${prefName?prefName.replace(/"/g,'&quot;'):''}"/></div>
   <div class="fg">
     <label class="fl">дата</label>
     <div class="mini-cal" id="miniCal"></div>
@@ -419,35 +554,31 @@ function buildAddSheet(){
   <div class="fg">
     <label class="fl">повтор</label>
     <div class="rrow">
-      ${['none','weekly','monthly','custom'].map(r=>`<button class="ropt${r==='none'?' on':''}" id="ropt-${r}" onclick="pickRepeat('${r}')">${{none:'без',weekly:'еженед.',monthly:'ежемес.',custom:'свой'}[r]}</button>`).join('')}
+      ${['none','weekly','monthly','custom'].map(r=>`<button class="ropt${r===selRepeat?' on':''}" id="ropt-${r}" onclick="pickRepeat('${r}')">${{none:'без',weekly:'еженед.',monthly:'ежемес.',custom:'свой'}[r]}</button>`).join('')}
     </div>
-    <div id="dowRow" style="display:none;"><div class="dow-pills">${WD.map((d,i)=>`<button class="dow-pill" id="dp${i}" onclick="toggleDow(${i})">${d}</button>`).join('')}</div></div>
+    <div id="dowRow" style="display:${selRepeat==='custom'?'block':'none'};"><div class="dow-pills">${WD.map((d,i)=>`<button class="dow-pill${selDow.includes(i)?' on':''}" id="dp${i}" onclick="toggleDow(${i})">${d}</button>`).join('')}</div></div>
   </div>
   <div class="toggle-row">
     <div><div class="toggle-label">возможное событие</div><div class="toggle-sub">точная дата не известна</div></div>
-    <button class="toggle" id="maybeToggle" onclick="toggleMaybe()"></button>
+    <button class="toggle${isMaybe?' on':''}" id="maybeToggle" onclick="toggleMaybe()"></button>
   </div>
-  <div class="mbtns"><button class="bcancel" onclick="closePanel()">отмена</button><button class="bsave" onclick="saveEv()">сохранить</button></div>`;
+  <div class="mbtns">
+    ${isEdit?`<button class="bdanger" onclick="delEvAndClose(${editId})">удалить</button><button class="bcancel" onclick="closePanel()">отмена</button>`:`<button class="bcancel" onclick="closePanel()">отмена</button>`}
+    <button class="bsave" onclick="saveEv()">${isEdit?'сохранить':'сохранить'}</button>
+  </div>`;
 }
-
-function toggleMaybe(){
-  isMaybe=!isMaybe;
-  const btn=document.getElementById('maybeToggle');
-  if(btn)btn.className='toggle'+(isMaybe?' on':'');
-}
-
+ 
+function toggleMaybe(){isMaybe=!isMaybe;const b=document.getElementById('maybeToggle');if(b)b.className='toggle'+(isMaybe?' on':'');}
+ 
 function renderMiniCal(){
   const now=new Date();
   const base=pickStart?{y:pickStart.y,m:pickStart.m}:{y:now.getFullYear(),m:now.getMonth()};
   let mo=base.y*12+base.m+mcOffset;
   let cy=Math.floor(mo/12),cm=((mo%12)+12)%12;
+  if(cm<0){cm+=12;cy--;}
   const tot=dim(cy,cm),start=fdow(cy,cm);
   const c=catById(selCat);
-  let h=`<div class="mc-nav">
-    <button class="mc-arr" onclick="mcNav(-1)">&#8249;</button>
-    <span class="mc-lbl">${MO[cm]} ${cy}</span>
-    <button class="mc-arr" onclick="mcNav(1)">&#8250;</button>
-  </div>
+  let h=`<div class="mc-nav"><button class="mc-arr" onclick="mcNav(-1)">&#8249;</button><span class="mc-lbl">${MO[cm]} ${cy}</span><button class="mc-arr" onclick="mcNav(1)">&#8250;</button></div>
   <div class="mc-wd">${WD.map(d=>`<div class="mc-wdc">${d}</div>`).join('')}</div>
   <div class="mc-days">`;
   for(let i=0;i<start;i++)h+=`<div class="mc-d empty"></div>`;
@@ -463,18 +594,11 @@ function renderMiniCal(){
   const mc=document.getElementById('miniCal');if(mc)mc.innerHTML=h;
   updateDateDisp();
 }
-
-function isSel(y,m,d){
-  if(pickStart&&pickStart.y===y&&pickStart.m===m&&pickStart.d===d)return true;
-  if(pickEnd&&pickEnd.y===y&&pickEnd.m===m&&pickEnd.d===d)return true;
-  return false;
-}
+function isSel(y,m,d){return (pickStart&&pickStart.y===y&&pickStart.m===m&&pickStart.d===d)||(pickEnd&&pickEnd.y===y&&pickEnd.m===m&&pickEnd.d===d);}
 function isInRange(y,m,d){
   if(!pickStart||!pickEnd)return false;
-  const ts=new Date(pickStart.y,pickStart.m,pickStart.d).getTime();
-  const te=new Date(pickEnd.y,pickEnd.m,pickEnd.d).getTime();
   const tc=new Date(y,m,d).getTime();
-  return tc>ts&&tc<te;
+  return tc>new Date(pickStart.y,pickStart.m,pickStart.d).getTime()&&tc<new Date(pickEnd.y,pickEnd.m,pickEnd.d).getTime();
 }
 function pickDay(y,m,d){
   if(!pickStart||pickEnd){pickStart={y,m,d};pickEnd=null;}
@@ -493,12 +617,10 @@ function updateDateDisp(){
   const fmt=p=>`${p.d} ${MO_G[p.m]}${p.y!==new Date().getFullYear()?' '+p.y:''}`;
   el.textContent=pickEnd?`${fmt(pickStart)} — ${fmt(pickEnd)}`:fmt(pickStart);
 }
-
 function buildChips(){
   return S.cats.map(c=>`<div class="chip" style="background:${hexA(c.color,c.id===selCat?0.22:0.08)};color:${c.color};border-color:${c.id===selCat?c.color:'transparent'}" onclick="pickCat('${c.id}')">${c.name}</div>`).join('');
 }
 function pickCat(id){selCat=id;const el=document.getElementById('catChips');if(el)el.innerHTML=buildChips();renderMiniCal();}
-
 function pickRepeat(r){
   selRepeat=r;
   ['none','weekly','monthly','custom'].forEach(x=>{const el=document.getElementById('ropt-'+x);if(el)el.className='ropt'+(x===r?' on':'');});
@@ -513,19 +635,27 @@ function toggleDow(i){
     el.style.color=on?c.color:'';el.style.background=on?hexA(c.color,0.15):'';el.style.borderColor=on?c.color:'';
   });
 }
-
 function saveEv(){
   const name=document.getElementById('evN').value.trim();
   if(!name||!pickStart)return;
-  const ds=pickStart.d,de=pickEnd?pickEnd.d:pickStart.d,y=pickStart.y,m=pickStart.m;
+  const ds=pickStart.d,y=pickStart.y,m=pickStart.m;
+  const de=pickEnd?(pickEnd.y===y&&pickEnd.m===m?pickEnd.d:pickStart.d):pickStart.d;
   const repeat=selRepeat==='custom'&&selDow.length?'custom':selRepeat==='custom'?'none':selRepeat;
-  S.events.push({id:Date.now(),name,year:y,month:m,dayStart:ds,dayEnd:de,cat:selCat||S.cats[0]?.id,repeat,repeatDow:[...selDow],maybe:isMaybe});
+  if(editId){
+    const idx=S.events.findIndex(e=>e.id===editId);
+    if(idx!==-1)S.events[idx]={...S.events[idx],name,year:y,month:m,dayStart:ds,dayEnd:de,cat:selCat||S.cats[0]?.id,repeat,repeatDow:[...selDow],maybe:isMaybe};
+  } else {
+    S.events.push({id:Date.now(),name,year:y,month:m,dayStart:ds,dayEnd:de,cat:selCat||S.cats[0]?.id,repeat,repeatDow:[...selDow],maybe:isMaybe});
+  }
   saveData();closePanel();renderCalView();
 }
-
+function delEvAndClose(id){
+  S.events=S.events.filter(e=>e.id!==id);
+  saveData();closePanel();renderCalView();
+}
+ 
 function buildCatsSheet(){
-  return `<div class="handle"></div>
-  <div class="sh-title">категории</div>
+  return `<div class="handle"></div><div class="sh-title">категории</div>
   <div id="catMgr">${buildCatRows()}</div>
   <button class="addcatbtn" onclick="addCat()">+ новая категория</button>
   <div class="mbtns" style="margin-top:1rem;"><button class="bsave" onclick="closePanel();renderCalView()">готово</button></div>`;
@@ -547,9 +677,10 @@ function renameCat(id,name){const c=S.cats.find(x=>x.id===id);if(c){c.name=name;
 function delCat(id){S.cats=S.cats.filter(c=>c.id!==id);saveData();refreshCatMgr();}
 function addCat(){S.cats.push({id:'c'+Date.now(),name:'новая',color:PAL[S.cats.length%PAL.length]});saveData();refreshCatMgr();}
 function refreshCatMgr(){const el=document.getElementById('catMgr');if(el)el.innerHTML=buildCatRows();}
-
+ 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel();});
 renderCalView();
 </script>
 </body>
 </html>
+ 
